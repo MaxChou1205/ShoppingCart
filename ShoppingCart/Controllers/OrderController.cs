@@ -4,49 +4,38 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ShoppingCart.Models;
+using ShoppingCart.Models.Repository;
 
 namespace ShoppingCart.Controllers
 {
-    [Route("order")]
+    [Route("api/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
     {
-        [HttpPost]
-        [Route("addOrder")]
-        public void AddOrder([FromBody] List<Dictionary<string, object>> parameters)
+        private IOrderRepository _orderRepository;
+
+        public OrderController(IOrderRepository orderRepository)
         {
-            using (SqlConnection conn = new SqlConnection("Server=(localdb)\\MSSQLLocalDB;Database=Cart;Integrated Security=true"))
-            {
-                var data = new List<Dictionary<string, object>>();
-                foreach (var parameter in parameters)
-                {
-                    data.Add(new Dictionary<string, object>
-                    {
-                        {"id", parameter["id"]},
-                        {"amount", parameter["amount"]}
-                    });
-                
-                }
-                string strSql = "INSERT INTO Order(ID,Amount) VALUES (@id,@amount);";
-                conn.Execute(strSql, data);
-            }
+            _orderRepository = orderRepository;
+        }
+
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<int> Add([FromBody] List<Order> orders)
+        {
+            return await _orderRepository.Add(orders);
         }
 
         [HttpGet]
-        [Route("getOrders")]
-        public APIResult GetOrders()
+        [Route("[action]")]
+        [Authorize(Policy = "Admin")]
+        public async Task<IEnumerable<Order>> Get()
         {
-            var result = new APIResult();
-            using (SqlConnection conn = new SqlConnection("Server=(localdb)\\MSSQLLocalDB;Database=Cart;Integrated Security=true"))
-            {
-                string strSql = "Select * from Order";
-                result.Data = conn.Query(strSql).ToList();
-                result.IsSucceed = true;
-            }
-            return result;
+            return await _orderRepository.Get();
         }
     }
 }

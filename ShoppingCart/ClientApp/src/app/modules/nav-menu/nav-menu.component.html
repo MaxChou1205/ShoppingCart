@@ -1,0 +1,8 @@
+<header>
+  <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3">
+    <div class="container">
+      <div *ngIf="userService.token">Hi {{userService.fullName}}</div>
+      <input *ngIf="userService.token" type="button" class="btn btn-secondary ml-3" value="Log out" (click)="logout()"/>
+    </div>
+  </nav>
+</header>

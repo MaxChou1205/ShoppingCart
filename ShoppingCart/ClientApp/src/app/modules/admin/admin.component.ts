@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { OrderService } from '../../core/services/order.service';
 
 @Component({
   selector: 'app-admin',
@@ -34,13 +35,13 @@ export class AdminComponent implements OnInit {
 
   items = [...this.baseData];
 
-  constructor(public http: HttpClient, @Inject('BASE_URL') public baseUrl: string) {
-    //this.http.get(this.baseUrl + '/Order/getOrders').subscribe((result: any) => {
-    //  this.items = result.Data;
-    //}, error => console.error(error));
+  constructor(private orderService: OrderService) {
   }
 
   ngOnInit() {
+    this.orderService.GetOrders().subscribe((orders: any[]) => {
+      this.items = [...orders];
+    });
   }
 
 }
